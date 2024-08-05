@@ -21,44 +21,8 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
-  @Post('upload')
-  @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'image', maxCount: 1 },
-        { name: 'model', maxCount: 1 },
-      ],
-      {
-        storage: diskStorage({
-          destination: './uploads', // pasta onde os arquivos serão salvos
-          filename: (req, file, callback) => {
-            const uniqueSuffix =
-              Date.now() + '-' + Math.round(Math.random() * 1e9);
-            const ext = extname(file.originalname);
-            const filename = `${file.fieldname}-${uniqueSuffix}${ext}`;
-            callback(null, filename);
-          },
-        }),
-      },
-    ),
-  )
-  async uploadFiles(
-    @UploadedFiles()
-    files: { image?: Express.Multer.File[]; model?: Express.Multer.File[] },
-    @Body() createProjectDto: CreateProjectDto,
-  ) {
-    if (!files || !files.image || !files.model) {
-      throw new BadRequestException('Both image and model files are required');
-    }
-
-    createProjectDto.image = files.image[0].path;
-    createProjectDto.model = files.model[0].path;
-
-    return this.projectsService.createWithFiles(createProjectDto);
-  }
-
   // teste com validação
-  @Post('uploaded')
+  @Post('upload')
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -100,7 +64,7 @@ export class ProjectsController {
       },
     ),
   )
-  async uploadFilesValidation(
+  async uploadFiles(
     @UploadedFiles()
     files: { image?: Express.Multer.File[]; model?: Express.Multer.File[] },
     @Body() createProjectDto: CreateProjectDto,

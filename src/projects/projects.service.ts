@@ -10,8 +10,8 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Project } from './entities/project.entity';
 import { Model } from 'mongoose';
-import { unlinkSync } from 'fs';
-import { join } from 'path';
+import { existsSync, unlinkSync } from 'fs';
+import { join, resolve } from 'path';
 
 @Injectable()
 export class ProjectsService {
@@ -126,24 +126,39 @@ export class ProjectsService {
         throw new NotFoundException(`Project with ID ${id} not found`);
       }
 
+      const uploadsDir = resolve(__dirname, '../../'); // Ajuste o caminho base para a pasta uploads
+
       if (project.image) {
-        const imagePath = join(__dirname, '../uploads', project.image);
-        console.log(imagePath);
-        try {
-          unlinkSync(imagePath);
-        } catch (err) {
-          console.error('Error details:', err);
-          throw new InternalServerErrorException('Error deleting image file');
+        // Construa o caminho completo para o arquivo de imagem
+        const imagePath = join(uploadsDir, project.image);
+        console.log('Attempting to delete image:', imagePath);
+
+        if (existsSync(imagePath)) {
+          try {
+            unlinkSync(imagePath);
+          } catch (err) {
+            console.error('Error details:', err);
+            throw new InternalServerErrorException('Error deleting image file');
+          }
+        } else {
+          console.warn('Image file does not exist:', imagePath);
         }
       }
 
       if (project.model) {
-        const modelPath = join(__dirname, '../uploads', project.model);
-        try {
-          unlinkSync(modelPath);
-          console.log(modelPath);
-        } catch (err) {
-          throw new InternalServerErrorException('Error deleting model file');
+        // Construa o caminho completo para o arquivo de modelo
+        const modelPath = join(uploadsDir, project.model);
+        console.log('Attempting to delete model:', modelPath);
+
+        if (existsSync(modelPath)) {
+          try {
+            unlinkSync(modelPath);
+          } catch (err) {
+            console.error('Error details:', err);
+            throw new InternalServerErrorException('Error deleting model file');
+          }
+        } else {
+          console.warn('Model file does not exist:', modelPath);
         }
       }
 
