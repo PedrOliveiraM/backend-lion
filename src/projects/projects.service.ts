@@ -95,26 +95,21 @@ export class ProjectsService {
   }
 
   async update(id: string, updateProjectDto: UpdateProjectDto) {
-    if (!id || !updateProjectDto) {
-      throw new BadRequestException('Project ID and Update Data are required');
+    // Verifica se o projeto existe
+    const existingProject: UpdateProjectDto =
+      await this.ProjectModel.findById(id);
+    if (!existingProject) {
+      throw new NotFoundException(`Project with ID ${id} not found`);
     }
-    try {
-      const updatedProject = await this.ProjectModel.findByIdAndUpdate(
-        id,
-        updateProjectDto,
-        { new: true },
-      ).exec();
 
-      if (!updatedProject) {
-        throw new NotFoundException(`Project with ID ${id} not found`);
-      }
-      return updatedProject;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Error updating project',
-        error.message,
-      );
-    }
+    const updatedProject = await this.ProjectModel.findByIdAndUpdate(
+      id,
+      updateProjectDto,
+      { new: true },
+    ).exec();
+    if (!updatedProject)
+      throw new NotFoundException(`Enterprise with ID ${id} not found`);
+    return updatedProject;
   }
 
   async remove(id: string) {
