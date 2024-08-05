@@ -10,12 +10,37 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Project } from './entities/project.entity';
 import { Model } from 'mongoose';
+import { unlinkSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private ProjectModel: Model<Project>,
   ) {}
+
+  async createWithFiles(createProjectDto: CreateProjectDto) {
+    if (!createProjectDto) {
+      throw new BadRequestException('Project data is required');
+    }
+    const { name, address } = createProjectDto;
+    const existingProject = await this.ProjectModel.findOne({
+      $or: [{ name }, { address }],
+    }).exec();
+
+    if (existingProject) {
+      throw new ConflictException('This name or address already exists');
+    }
+    try {
+      const createdProject = new this.ProjectModel(createProjectDto);
+      return await createdProject.save();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error Creating Project',
+        error.message,
+      );
+    }
+  }
 
   async create(createProjectDto: CreateProjectDto) {
     if (!createProjectDto) {
@@ -96,14 +121,38 @@ export class ProjectsService {
     if (!id) throw new BadRequestException('Project ID is required');
 
     try {
-      const result = await this.ProjectModel.deleteOne({ _id: id });
-      if (!result)
+      const project = await this.ProjectModel.findById(id).exec();
+      if (!project) {
         throw new NotFoundException(`Project with ID ${id} not found`);
+      }
+
+      if (project.image) {
+        const imagePath = join(__dirname, '../uploads', project.image);
+        console.log(imagePath);
+        try {
+          unlinkSync(imagePath);
+        } catch (err) {
+          console.error('Error details:', err);
+          throw new InternalServerErrorException('Error deleting image file');
+        }
+      }
+
+      if (project.model) {
+        const modelPath = join(__dirname, '../uploads', project.model);
+        try {
+          unlinkSync(modelPath);
+          console.log(modelPath);
+        } catch (err) {
+          throw new InternalServerErrorException('Error deleting model file');
+        }
+      }
+
+      // Excluir o projeto do banco de dados
+      const result = await this.ProjectModel.deleteOne({ _id: id }).exec();
       return result;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error deleting project',
-        error.message,
+        'Error deleting project: ' + error.message,
       );
     }
   }
