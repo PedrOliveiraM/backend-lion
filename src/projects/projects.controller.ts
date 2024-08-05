@@ -11,6 +11,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   NotFoundException,
+  Res,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -19,13 +20,13 @@ import { extname, join, resolve } from 'path';
 import { diskStorage } from 'multer';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { existsSync, unlinkSync } from 'fs';
-
+import { Response } from 'express';
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   // teste com validação
-  @Post('upload')
+  @Post('')
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -79,11 +80,6 @@ export class ProjectsController {
     createProjectDto.image = files.image[0].path;
     createProjectDto.model = files.model[0].path;
 
-    return this.projectsService.createWithFiles(createProjectDto);
-  }
-
-  @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
     return this.projectsService.create(createProjectDto);
   }
 
@@ -95,6 +91,11 @@ export class ProjectsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectsService.findOne(id);
+  }
+
+  @Get('/files/:name')
+  async getUploadedFile(@Param('name') fileName: string, @Res() res: Response) {
+    return this.projectsService.sendFile(fileName, res);
   }
 
   @Patch(':id')
@@ -151,10 +152,10 @@ export class ProjectsController {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
 
-    const uploadsDir = resolve(__dirname, '../../uploads'); // Ajuste o caminho base para a pasta uploads
+    const uploadsDir = resolve(__dirname, '../../'); // Ajuste o caminho base para a pasta uploads
 
     // Se novo arquivo de imagem for enviado, remova o antigo e atualize o caminho
-    if (files.image) {
+    if (files?.image && files.image.length > 0) {
       if (existingProject.image) {
         const oldImagePath = join(uploadsDir, existingProject.image);
         if (existsSync(oldImagePath)) {
@@ -171,7 +172,7 @@ export class ProjectsController {
     }
 
     // Se novo arquivo de modelo for enviado, remova o antigo e atualize o caminho
-    if (files.model) {
+    if (files?.model && files.model.length > 0) {
       if (existingProject.model) {
         const oldModelPath = join(uploadsDir, existingProject.model);
         if (existsSync(oldModelPath)) {

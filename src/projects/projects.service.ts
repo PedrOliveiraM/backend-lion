@@ -12,35 +12,14 @@ import { Project } from './entities/project.entity';
 import { Model } from 'mongoose';
 import { existsSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
+import { Response } from 'express';
 
 @Injectable()
 export class ProjectsService {
+  projectsService: any;
   constructor(
     @InjectModel(Project.name) private ProjectModel: Model<Project>,
   ) {}
-
-  async createWithFiles(createProjectDto: CreateProjectDto) {
-    if (!createProjectDto) {
-      throw new BadRequestException('Project data is required');
-    }
-    const { name, address } = createProjectDto;
-    const existingProject = await this.ProjectModel.findOne({
-      $or: [{ name }, { address }],
-    }).exec();
-
-    if (existingProject) {
-      throw new ConflictException('This name or address already exists');
-    }
-    try {
-      const createdProject = new this.ProjectModel(createProjectDto);
-      return await createdProject.save();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Error Creating Project',
-        error.message,
-      );
-    }
-  }
 
   async create(createProjectDto: CreateProjectDto) {
     if (!createProjectDto) {
@@ -92,6 +71,16 @@ export class ProjectsService {
         error.message,
       );
     }
+  }
+
+  sendFile(fileName: string, res: Response) {
+    const filePath = join(__dirname, '../../uploads', fileName);
+
+    if (!existsSync(filePath)) {
+      throw new NotFoundException(`File ${fileName} not found`);
+    }
+
+    return res.sendFile(filePath);
   }
 
   async update(id: string, updateProjectDto: UpdateProjectDto) {
