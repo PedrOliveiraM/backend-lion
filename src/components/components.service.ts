@@ -62,7 +62,7 @@ export class ComponentsService {
 
     try {
       const components = await this.ComponentModel.find({
-        project_id: id,
+        element_id: id,
       }).exec();
       if (!components || components.length === 0) {
         throw new NotFoundException(
