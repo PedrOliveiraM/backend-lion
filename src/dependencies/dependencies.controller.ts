@@ -30,6 +30,11 @@ export class DependenciesController {
     return this.dependenciesService.findOne(id);
   }
 
+  @Get('all/:id')
+  findAllByProjectId(@Param('id') id: string) {
+    return this.dependenciesService.findAllByProjectId(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

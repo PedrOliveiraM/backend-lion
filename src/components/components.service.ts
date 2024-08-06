@@ -55,7 +55,7 @@ export class ComponentsService {
     }
   }
 
-  async findAllByProjectId(id: string) {
+  async findAllByElementId(id: string) {
     if (!id) {
       throw new BadRequestException('Project ID is required');
     }
@@ -65,9 +65,7 @@ export class ComponentsService {
         element_id: id,
       }).exec();
       if (!components || components.length === 0) {
-        throw new NotFoundException(
-          `No components found with project_id ${id}`,
-        );
+        throw new NotFoundException(`No elements found with project_id ${id}`);
       }
       return components;
     } catch (error) {

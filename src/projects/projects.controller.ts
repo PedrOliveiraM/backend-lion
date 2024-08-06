@@ -92,6 +92,10 @@ export class ProjectsController {
   findOne(@Param('id') id: string) {
     return this.projectsService.findOne(id);
   }
+  @Get('all/:id')
+  findAllByEnterpriseId(@Param('id') id: string) {
+    return this.projectsService.findAllByEnterpriseId(id);
+  }
 
   @Get('/files/:name')
   async getUploadedFile(@Param('name') fileName: string, @Res() res: Response) {

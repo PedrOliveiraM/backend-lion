@@ -47,6 +47,25 @@ export class DependenciesService {
       );
     }
   }
+  async findAllByProjectId(id: string) {
+    if (!id) {
+      throw new BadRequestException('Project ID is required');
+    }
+
+    try {
+      const projects = await this.DependencyModel.find({
+        project_id: id,
+      }).exec();
+      if (!projects || projects.length === 0) {
+        throw new NotFoundException(`No projects found with project_id ${id}`);
+      }
+      return projects;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error fetching components: ' + error.message,
+      );
+    }
+  }
 
   update(id: string, updateDependencyDto: UpdateDependencyDto) {
     if (!id || !updateDependencyDto) {

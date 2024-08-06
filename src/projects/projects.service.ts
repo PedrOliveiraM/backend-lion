@@ -73,6 +73,28 @@ export class ProjectsService {
     }
   }
 
+  async findAllByEnterpriseId(id: string) {
+    if (!id) {
+      throw new BadRequestException('Enterprise ID is required');
+    }
+
+    try {
+      const projects = await this.ProjectModel.find({
+        enterprise_id: id,
+      }).exec();
+      if (!projects || projects.length === 0) {
+        throw new NotFoundException(
+          `No projects found with enterprise_id ${id}`,
+        );
+      }
+      return projects;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error fetching components: ' + error.message,
+      );
+    }
+  }
+
   sendFile(fileName: string, res: Response) {
     const filePath = join(__dirname, '../../uploads', fileName);
 

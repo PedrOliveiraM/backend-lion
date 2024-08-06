@@ -32,7 +32,7 @@ export class ComponentsController {
 
   @Get('all/:id')
   findAllByProjectId(@Param('id') id: string) {
-    return this.componentsService.findAllByProjectId(id);
+    return this.componentsService.findAllByElementId(id);
   }
 
   @Patch(':id')
