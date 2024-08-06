@@ -74,19 +74,18 @@ export class DependenciesService {
     }
   }
 
-  remove(id: string) {
-    if (!id) {
-      throw new BadRequestException('Error ID is required');
-    }
-
+  async remove(id: string) {
+    if (!id) throw new BadRequestException('Dependency ID is required');
     try {
-      const deletedDependency = this.DependencyModel.deleteOne({ _id: id });
-      if (!deletedDependency) {
-        throw new Error('Error for deleting dependency');
+      const result = await this.DependencyModel.deleteOne({ _id: id }).exec();
+      if (result.deletedCount === 0) {
+        throw new NotFoundException(`Dependency with ID ${id} not found`);
       }
-      return deletedDependency;
+      return result;
     } catch (error) {
-      throw new InternalServerErrorException('Error update dependency');
+      throw new BadRequestException(
+        'Error deleting Dependency: ' + error.message,
+      );
     }
   }
 }
