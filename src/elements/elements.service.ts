@@ -22,10 +22,10 @@ export class ElementsService {
       throw new BadRequestException('Element data is required');
     }
 
-    const { name, dependency_id } = createElementDto;
+    const { name } = createElementDto;
 
     const existElement = await this.ElementModel.findOne({
-      $or: [{ name }, { dependency_id }],
+      $or: [{ name }],
     }).exec();
 
     if (existElement) {
@@ -67,6 +67,30 @@ export class ElementsService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error finding element by ID: ' + error.message,
+      );
+    }
+  }
+
+  async findAllByDependencyId(id: string) {
+    if (!id) {
+      throw new BadRequestException('Id is required');
+    }
+
+    try {
+      const elements = await this.ElementModel.find({
+        dependency_id: id,
+      }).exec();
+
+      if (!elements || elements.length === 0) {
+        throw new NotFoundException(
+          'No elements found with the provided dependency_id',
+        );
+      }
+
+      return elements;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error finding elements by dependency_id: ' + error.message,
       );
     }
   }

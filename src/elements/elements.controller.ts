@@ -30,6 +30,11 @@ export class ElementsController {
     return this.elementsService.findOne(id);
   }
 
+  @Get('/all/:id')
+  findAllByDependencyId(@Param('id') id: string) {
+    return this.elementsService.findAllByDependencyId(id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateElementDto: UpdateElementDto) {
     return this.elementsService.update(id, updateElementDto);
