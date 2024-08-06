@@ -5,6 +5,7 @@ import { EnterprisesModule } from './enterprises/enterprises.module';
 import { ProjectsModule } from './projects/projects.module';
 import { DependenciesModule } from './dependencies/dependencies.module';
 import { ElementsModule } from './elements/elements.module';
+import { ComponentsModule } from './components/components.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ElementsModule } from './elements/elements.module';
     ProjectsModule,
     DependenciesModule,
     ElementsModule,
+    ComponentsModule,
   ],
   controllers: [],
   providers: [],
