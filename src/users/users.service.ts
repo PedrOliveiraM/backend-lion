@@ -4,19 +4,29 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import 'dotenv/config';
+import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
+import { ForgetPasswordDto } from './dto/forgetPasswor-user-dto';
+import { LoginDto } from './dto/login-user-dto';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto) {
-    if (!createUserDto) {
-      throw new BadRequestException('User data is required');
+    if (!createUserDto.username) {
+      throw new BadRequestException('Username is required');
+    }
+    if (!createUserDto.password) {
+      throw new BadRequestException('Password is required');
+    }
+    if (!createUserDto.email) {
+      throw new BadRequestException('Email data is required');
     }
 
     const { email, username } = createUserDto;
@@ -90,6 +100,136 @@ export class UsersService {
       return result;
     } catch (error) {
       throw new BadRequestException('Error deleting user: ' + error.message);
+    }
+  }
+
+  async findByEmail(email: string) {
+    try {
+      if (!email) {
+        throw new BadRequestException('email is required !');
+      }
+      const result = await this.UserModel.findOne({ email }).exec();
+      if (!result) {
+        throw new NotFoundException('Error not found email in database');
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException('Error fetching email: ' + error.message);
+    }
+  }
+
+  async findByUsername(username: string) {
+    try {
+      if (!username) {
+        throw new BadRequestException('Username is required !');
+      }
+      const result = await this.UserModel.findOne({ username }).exec();
+      if (!result) {
+        throw new NotFoundException('Error not found username in database');
+      }
+      return result;
+    } catch (error) {
+      throw new BadRequestException(
+        'Error fetching username: ' + error.message,
+      );
+    }
+  }
+
+  async validateUser(loginDto: LoginDto) {
+    if (!loginDto.password) {
+      throw new BadRequestException('Error username and password is required');
+    }
+
+    try {
+      const { username, password } = loginDto;
+      const user = await this.findByUsername(username);
+
+      if (user.username !== username) {
+        throw new Error('Username is incorrect');
+      }
+      if (user.password !== password) {
+        throw new Error('Username is incorrect');
+      }
+
+      return {
+        code: 201,
+        msg: 'User validation',
+        status: true,
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Error username or password is incorrect ' + error.message,
+      );
+    }
+  }
+
+  async sendPasswordResetEmail(forgetPasswordDto: ForgetPasswordDto) {
+    const existingEmail = await this.findByEmail(forgetPasswordDto.email);
+
+    if (!existingEmail) {
+      throw new NotFoundException('Error fetching email');
+    }
+
+    const mailerSend = new MailerSend({
+      apiKey: process.env.API_KEY,
+    });
+
+    const sentFrom = new Sender(
+      'your-email@trial-vywj2lpye9jl7oqz.mlsender.net',
+      'LionXproSupport',
+    );
+
+    const recipients = [
+      new Recipient(existingEmail.email, existingEmail.username),
+    ];
+
+    const emailParams = new EmailParams()
+      .setFrom(sentFrom)
+      .setTo(recipients)
+      .setReplyTo(sentFrom)
+      .setSubject('Recuperação de Senha - Sua Nova Senha')
+      .setHtml(
+        `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #333; text-align: center;">Recuperação de Senha</h2>
+          <p style="color: #555; font-size: 16px;">
+            Olá,
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            Recebemos uma solicitação para redefinir sua senha. Aqui está sua nova senha temporária:
+          </p>
+          <p style="font-size: 20px; font-weight: bold; text-align: center; color: #333;">
+            <span style="background-color: #f2f2f2; padding: 10px 20px; border-radius: 5px;">${existingEmail.password}</span>
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            Por favor, use essa senha para acessar sua conta e, em seguida, altere-a para uma senha de sua escolha por motivos de segurança.
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            Se você não solicitou uma redefinição de senha, por favor, ignore este email.
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            Obrigado,
+          </p>
+          <p style="color: #555; font-size: 16px;">
+            <strong>Equipe de suporte Lion X PRO</strong>
+          </p>
+          <div style="text-align: center; margin-top: 20px;">
+            <a href="https://www.seusite.com" style="color: #fff; background-color: #4CAF50; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Visite nosso site</a>
+          </div>
+        </div>
+      `,
+      )
+      .setText(
+        'Olá, Recebemos uma solicitação para redefinir sua senha. Use a nova senha fornecida para acessar sua conta e altere-a para uma nova senha de sua escolha. Obrigado.',
+      );
+
+    const result = await mailerSend.email.send(emailParams);
+    if (result) {
+      return {
+        code: 201,
+        msg: 'Email for reset password is send',
+        status: true,
+      };
     }
   }
 }
