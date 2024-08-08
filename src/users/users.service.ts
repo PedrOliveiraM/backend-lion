@@ -11,7 +11,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import 'dotenv/config';
 import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
-import { ForgetPasswordDto } from './dto/forgetPasswor-user-dto';
+import { ForgetPasswordDto } from './dto/forgetPassword-user-dto';
 import { LoginDto } from './dto/login-user-dto';
 
 @Injectable()

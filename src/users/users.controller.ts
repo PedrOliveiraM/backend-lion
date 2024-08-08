@@ -12,7 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginDto } from './dto/login-user-dto';
-import { ForgetPasswordDto } from './dto/forgetPasswor-user-dto';
+import { ForgetPasswordDto } from './dto/forgetPassword-user-dto';
 
 @Controller('users')
 export class UsersController {

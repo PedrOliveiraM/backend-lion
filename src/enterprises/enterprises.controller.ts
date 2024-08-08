@@ -30,6 +30,11 @@ export class EnterprisesController {
     return this.enterprisesService.findOne(id);
   }
 
+  @Get('/all/:id')
+  findAllByDependencyId(@Param('id') id: string) {
+    return this.enterprisesService.findAllByUserId(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

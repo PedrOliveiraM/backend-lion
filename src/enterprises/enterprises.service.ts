@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
@@ -20,10 +21,11 @@ export class EnterprisesService {
     if (!createEnterpriseDto) {
       throw new BadRequestException('Enterprise data is required');
     }
-    const { name, region } = createEnterpriseDto;
+    const { name, region, userId } = createEnterpriseDto;
 
     const existingEnterprise = await this.EnterpriseModel.findOne({
       $or: [{ name }, { region }],
+      $and: [{ userId }],
     }).exec();
     if (existingEnterprise) {
       throw new ConflictException('name or region already exists');
@@ -56,6 +58,30 @@ export class EnterprisesService {
     } catch (error) {
       throw new BadRequestException(
         'Error fetching enterprise: ' + error.message,
+      );
+    }
+  }
+
+  async findAllByUserId(id: string) {
+    if (!id) {
+      throw new BadRequestException('Id is required');
+    }
+
+    try {
+      const user = await this.EnterpriseModel.find({
+        userID: id,
+      }).exec();
+
+      if (!user || user.length === 0) {
+        throw new NotFoundException(
+          'No user found with the provided dependency_id',
+        );
+      }
+
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error finding enterprises by user id: ' + error.message,
       );
     }
   }

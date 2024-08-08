@@ -13,6 +13,9 @@ export class Enterprise {
 
   @Prop()
   description: string;
+
+  @Prop()
+  userID: string;
 }
 
 export const EnterpriseSchema = SchemaFactory.createForClass(Enterprise);
