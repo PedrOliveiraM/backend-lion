@@ -74,6 +74,14 @@ export class UsersService {
       throw new BadRequestException('User ID and update data are required');
     }
     try {
+      const { email, username } = updateUserDto;
+
+      const existingUser = await this.UserModel.findOne({
+        $or: [{ email }, { username }],
+      }).exec();
+      if (existingUser) {
+        throw new ConflictException('Email or username already exists');
+      }
       const updatedUser = await this.UserModel.findByIdAndUpdate(
         id,
         updateUserDto,

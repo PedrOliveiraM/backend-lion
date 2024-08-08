@@ -26,6 +26,7 @@ export class ProjectsService {
       throw new BadRequestException('Project data is required');
     }
     const { name, address } = createProjectDto;
+
     const existingProject = await this.ProjectModel.findOne({
       $or: [{ name }, { address }],
     }).exec();
