@@ -155,6 +155,7 @@ export class UsersService {
         code: 201,
         msg: 'User validation',
         status: true,
+        id: user._id,
       };
     } catch (error) {
       throw new BadRequestException(
