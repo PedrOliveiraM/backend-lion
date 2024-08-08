@@ -31,7 +31,7 @@ export class EnterprisesController {
   }
 
   @Get('/all/:id')
-  findAllByDependencyId(@Param('id') id: string) {
+  findAllByUserId(@Param('id') id: string) {
     return this.enterprisesService.findAllByUserId(id);
   }
 

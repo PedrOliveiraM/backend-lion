@@ -5,10 +5,10 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import { Enterprise } from './entities/enterprise.entity';
 
 @Injectable()
@@ -17,24 +17,36 @@ export class EnterprisesService {
     @InjectModel(Enterprise.name) private EnterpriseModel: Model<Enterprise>,
   ) {}
 
-  async create(createEnterpriseDto: CreateEnterpriseDto) {
-    if (!createEnterpriseDto) {
-      throw new BadRequestException('Enterprise data is required');
-    }
-    const { name, region, userId } = createEnterpriseDto;
+  async create(createEnterpriseDto: CreateEnterpriseDto): Promise<Enterprise> {
+    const { name, userId } = createEnterpriseDto;
 
-    const existingEnterprise = await this.EnterpriseModel.findOne({
-      $or: [{ name }, { region }],
-      $and: [{ userId }],
-    }).exec();
-    if (existingEnterprise) {
-      throw new ConflictException('name or region already exists');
+    // Verificação básica das entradas
+    if (!name || !userId) {
+      throw new BadRequestException('Name and ID are required fields');
     }
+
     try {
+      // Verificar se já existe um empreendimento com o mesmo nome e ID
+      const existingEnterprise = await this.EnterpriseModel.findOne({
+        name,
+        userId,
+      });
+      if (existingEnterprise) {
+        throw new ConflictException(
+          'Enterprise with the same name and ID already exists',
+        );
+      }
+
+      // Criar um novo empreendimento
       const createdEnterprise = new this.EnterpriseModel(createEnterpriseDto);
       return await createdEnterprise.save();
     } catch (error) {
-      throw new BadRequestException('Error creating user: ' + error.message);
+      // Capturar erros de Mongoose (erros de conexão, etc.)
+      if (error.name === 'MongoError' || error.name === 'MongooseError') {
+        throw new InternalServerErrorException('Database error occurred');
+      }
+      // Rethrow the caught exception (e.g., ConflictException, BadRequestException)
+      throw error;
     }
   }
 
@@ -69,13 +81,11 @@ export class EnterprisesService {
 
     try {
       const user = await this.EnterpriseModel.find({
-        userID: id,
+        userId: id,
       }).exec();
 
       if (!user || user.length === 0) {
-        throw new NotFoundException(
-          'No user found with the provided dependency_id',
-        );
+        throw new NotFoundException('No user found with the provided user id');
       }
 
       return user;
