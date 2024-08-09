@@ -1,26 +1,23 @@
-import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @IsString()
-  @IsNotEmpty()
   name: string;
 
   @IsString()
-  @IsNotEmpty()
   address: string;
 
   @IsString()
-  @IsNotEmpty()
+  area: string;
+
+  @IsString()
+  enterprise_id: string;
+
+  @IsString()
+  @IsOptional()
   image: string;
 
-  @IsNumber()
-  area: number;
-
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   model: string;
-
-  @IsString()
-  @IsNotEmpty()
-  enterprise_id: string;
 }

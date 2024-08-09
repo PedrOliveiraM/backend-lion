@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,10 +17,19 @@ export class DependenciesService {
     @InjectModel(Dependency.name) private DependencyModel: Model<Dependency>,
   ) {}
 
-  create(createDependencyDto: CreateDependencyDto) {
+  async create(createDependencyDto: CreateDependencyDto) {
     try {
       if (!createDependencyDto.name || !createDependencyDto.project_id) {
         throw new BadRequestException('Error projectID and name is required ');
+      }
+
+      const { name, project_id } = createDependencyDto;
+      const existingDependency = await this.DependencyModel.findOne({
+        $and: [{ name }, { project_id }],
+      }).exec();
+
+      if (existingDependency) {
+        throw new ConflictException('This dependency is existed');
       }
       const createdDependency = new this.DependencyModel(createDependencyDto);
       return createdDependency.save();

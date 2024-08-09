@@ -26,7 +26,7 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   // teste com validação
-  @Post('')
+  @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -35,7 +35,7 @@ export class ProjectsController {
       ],
       {
         storage: diskStorage({
-          destination: './uploads', // Pasta onde os arquivos serão salvos
+          destination: './uploads',
           filename: (req, file, callback) => {
             const uniqueSuffix =
               Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -73,14 +73,35 @@ export class ProjectsController {
     files: { image?: Express.Multer.File[]; model?: Express.Multer.File[] },
     @Body() createProjectDto: CreateProjectDto,
   ) {
-    if (!files || !files.image || !files.model) {
-      throw new BadRequestException('Both image and model files are required');
+    try {
+      if (
+        !createProjectDto.name ||
+        !createProjectDto.area ||
+        !createProjectDto.enterprise_id
+      ) {
+        throw new BadRequestException(
+          `Data is required ${createProjectDto.name} 
+          ${createProjectDto.area} 
+          ${createProjectDto.address}`,
+        );
+      }
+      if (!files || !files.image || !files.model) {
+        throw new BadRequestException(
+          'Both image and model files are required',
+        );
+      }
+      createProjectDto.image = files.image[0].path;
+      createProjectDto.model = files.model[0].path;
+      return await this.projectsService.create(createProjectDto);
+    } catch (error) {
+      if (files.image && files.image[0].path) {
+        unlinkSync(files.image[0].path);
+      }
+      if (files.model && files.model[0].path) {
+        unlinkSync(files.model[0].path);
+      }
+      throw error;
     }
-
-    createProjectDto.image = files.image[0].path;
-    createProjectDto.model = files.model[0].path;
-
-    return this.projectsService.create(createProjectDto);
   }
 
   @Get()

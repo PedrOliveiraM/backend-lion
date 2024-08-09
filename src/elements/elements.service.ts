@@ -22,16 +22,15 @@ export class ElementsService {
       throw new BadRequestException('Element data is required');
     }
 
-    const { name } = createElementDto;
+    const { name, dependency_id } = createElementDto;
 
     const existElement = await this.ElementModel.findOne({
-      $or: [{ name }],
+      $and: [{ name }, { dependency_id }],
     }).exec();
 
     if (existElement) {
       throw new ConflictException('Name or dependency_id already exists');
     }
-
     try {
       const createdElement = new this.ElementModel(createElementDto);
       return await createdElement.save();

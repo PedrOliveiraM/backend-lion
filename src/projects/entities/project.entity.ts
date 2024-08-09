@@ -12,16 +12,16 @@ export class Project {
   address: string;
 
   @Prop()
-  image: string;
-
-  @Prop()
-  area: number;
-
-  @Prop()
-  model: string;
+  area: string;
 
   @Prop()
   enterprise_id: string;
+
+  @Prop()
+  image: string;
+
+  @Prop()
+  model: string;
 }
 
 export const ProjectSchema = SchemaFactory.createForClass(Project);

@@ -16,7 +16,6 @@ import { Response } from 'express';
 
 @Injectable()
 export class ProjectsService {
-  projectsService: any;
   constructor(
     @InjectModel(Project.name) private ProjectModel: Model<Project>,
   ) {}
@@ -25,14 +24,15 @@ export class ProjectsService {
     if (!createProjectDto) {
       throw new BadRequestException('Project data is required');
     }
-    const { name, address } = createProjectDto;
-
+    const { name, address, enterprise_id } = createProjectDto;
     const existingProject = await this.ProjectModel.findOne({
-      $or: [{ name }, { address }],
+      $and: [{ name }, { address }, { enterprise_id }],
     }).exec();
 
     if (existingProject) {
-      throw new ConflictException('This name or address already exists');
+      throw new ConflictException(
+        'This name or address already exists with enterprise id',
+      );
     }
     try {
       const createdProject = new this.ProjectModel(createProjectDto);
