@@ -1,15 +1,15 @@
-import { IsNumber, IsString } from 'class-validator';
+import * as classValidator from 'class-validator';
 
 export class CreateComponentDto {
-  @IsString()
+  @classValidator.IsString()
   material: string;
 
-  @IsNumber()
+  @classValidator.IsNumber()
   quantity: number;
 
-  @IsString()
+  @classValidator.IsString()
   energy_efficiency: string;
 
-  @IsString()
+  @classValidator.IsString()
   element_id: string;
 }
