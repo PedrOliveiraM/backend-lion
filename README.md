@@ -1,73 +1,36 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Projeto Lion X Pro ![Concluído](https://img.shields.io/badge/status-concluído-green) 
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este back-end foi desenvolvido para o projeto de iniciação científica Lion X pro, um software web de modelagem 3D, para o público de arquitetura e engenharia.
 
-## Description
+## Tecnologias
+![Tecnologias](https://skillicons.dev/icons?i=ts,nest,mongo,docker,git)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Índice
 
-## Installation
+- [Sobre](#sobre)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias](#tecnologias)
+- [Contato](#contato)
 
-```bash
-$ npm install
-```
+## Sobre
+O projeto de backend voltado para arquitetura e engenharia visa gerenciar e organizar dados de empreendimentos, projetos, dependências, componentes e elementos. Este sistema é responsável por fornecer uma estrutura robusta para o acompanhamento e análise de grandes obras, desde a concepção até a execução, permitindo a gestão de cada detalhe dos projetos de forma integrada.
 
-## Running the app
+## Funcionalidades
 
-```bash
-# development
-$ npm run start
+- Cadastro de Empreendimentos
+- Gestão de Projetos
+- Armazenamento de componentes
+- Armazenamentos de arquivos obj e 3D
+- Geração de pdf formato no padrão exigido
+- Autentificação
 
-# watch mode
-$ npm run start:dev
+## Contato
 
-# production mode
-$ npm run start:prod
-```
+[![Instagram](https://img.shields.io/badge/Instagram-%231DA1F2.svg?&style=for-the-badge&logo=twitter&logoColor=white)](https://instagram.com/pedro.liveiram)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?&style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/pedro-oliveira-m/)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:pedropucmont@gmail.com)
 
-## Test
 
-```bash
-# unit tests
-$ npm run test
 
-# e2e tests
-$ npm run test:e2e
 
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
