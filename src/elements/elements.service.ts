@@ -5,10 +5,10 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateElementDto } from './dto/create-element.dto';
 import { UpdateElementDto } from './dto/update-element.dto';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import { Element } from './entities/element.entity';
 
 @Injectable()

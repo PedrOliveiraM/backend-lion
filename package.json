@@ -7,8 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"mongo-seed/**/*.js\"",
     "start": "nest start",
+    "seed": "node mongo-seed/seed.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -31,7 +32,7 @@
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.5",
     "mailersend": "^2.2.0",
-    "mongoose": "^8.5.2",
+    "mongoose": "^8.6.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
   },

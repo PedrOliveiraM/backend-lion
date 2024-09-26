@@ -133,10 +133,9 @@ export class ProjectsService {
         throw new NotFoundException(`Project with ID ${id} not found`);
       }
 
-      const uploadsDir = resolve(__dirname, '../../'); // Ajuste o caminho base para a pasta uploads
+      const uploadsDir = resolve(__dirname, '../../');
 
       if (project.image) {
-        // Construa o caminho completo para o arquivo de imagem
         const imagePath = join(uploadsDir, project.image);
         console.log('Attempting to delete image:', imagePath);
 
@@ -153,7 +152,6 @@ export class ProjectsService {
       }
 
       if (project.model) {
-        // Construa o caminho completo para o arquivo de modelo
         const modelPath = join(uploadsDir, project.model);
         console.log('Attempting to delete model:', modelPath);
 

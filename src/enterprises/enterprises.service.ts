@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Project } from 'src/projects/entities/project.entity';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 import { Enterprise } from './entities/enterprise.entity';
@@ -15,6 +16,7 @@ import { Enterprise } from './entities/enterprise.entity';
 export class EnterprisesService {
   constructor(
     @InjectModel(Enterprise.name) private EnterpriseModel: Model<Enterprise>,
+    @InjectModel(Project.name) private ProjectModel: Model<Project>,
   ) {}
 
   async create(createEnterpriseDto: CreateEnterpriseDto): Promise<Enterprise> {
@@ -119,6 +121,12 @@ export class EnterprisesService {
   async remove(id: string) {
     if (!id) throw new BadRequestException('Enterprise ID is required');
     try {
+      const projects = await this.ProjectModel.find({ enterpriseId: id }); // Adjust according to your schema
+
+      for (const project of projects) {
+        await this.ProjectModel.deleteOne({ _id: project._id }).exec(); // Remove each project
+      }
+
       const result = await this.EnterpriseModel.deleteOne({ _id: id }).exec();
       if (result.deletedCount === 0) {
         throw new NotFoundException(`Enterprise with ID ${id} not found`);
