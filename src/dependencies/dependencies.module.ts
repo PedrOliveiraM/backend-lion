@@ -12,5 +12,6 @@ import { Dependency, DependencySchema } from './entities/dependency.entity';
   ],
   controllers: [DependenciesController],
   providers: [DependenciesService],
+  exports: [DependenciesService],
 })
 export class DependenciesModule {}

@@ -66,6 +66,7 @@ export class DependenciesService {
       const projects = await this.DependencyModel.find({
         project_id: id,
       }).exec();
+
       if (!projects || projects.length === 0) {
         throw new NotFoundException(`No projects found with project_id ${id}`);
       }

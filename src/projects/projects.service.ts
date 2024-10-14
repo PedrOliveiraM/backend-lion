@@ -13,11 +13,13 @@ import { Model } from 'mongoose';
 import { existsSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
 import { Response } from 'express';
+import { DependenciesService } from 'src/dependencies/dependencies.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private ProjectModel: Model<Project>,
+    private readonly dependencyService: DependenciesService,
   ) {}
 
   async create(createProjectDto: CreateProjectDto) {
@@ -61,7 +63,9 @@ export class ProjectsService {
       throw new BadRequestException('Project ID is required');
     }
     try {
-      const project = await this.ProjectModel.findById(id);
+      const project = await this.ProjectModel.findOne({
+        _id: id,
+      });
       if (!project) {
         throw new NotFoundException(`Project with ID ${id} not found`);
       }
@@ -128,18 +132,17 @@ export class ProjectsService {
     if (!id) throw new BadRequestException('Project ID is required');
 
     try {
-      const project = await this.ProjectModel.findById(id).exec();
+      const project = await this.ProjectModel.findOne({ _id: id }).exec();
+
       if (!project) {
         throw new NotFoundException(`Project with ID ${id} not found`);
       }
 
-      const uploadsDir = resolve(__dirname, '../../'); // Ajuste o caminho base para a pasta uploads
+      const uploadsDir = resolve(__dirname, '../../');
 
+      // Remove image if exists
       if (project.image) {
-        // Construa o caminho completo para o arquivo de imagem
         const imagePath = join(uploadsDir, project.image);
-        console.log('Attempting to delete image:', imagePath);
-
         if (existsSync(imagePath)) {
           try {
             unlinkSync(imagePath);
@@ -152,11 +155,9 @@ export class ProjectsService {
         }
       }
 
+      // Remove model if exists
       if (project.model) {
-        // Construa o caminho completo para o arquivo de modelo
         const modelPath = join(uploadsDir, project.model);
-        console.log('Attempting to delete model:', modelPath);
-
         if (existsSync(modelPath)) {
           try {
             unlinkSync(modelPath);
@@ -169,13 +170,37 @@ export class ProjectsService {
         }
       }
 
-      // Excluir o projeto do banco de dados
+      // Remove dependencies associated with this project
+      const dependencyBindProject =
+        await this.dependencyService.findAllByProjectId(project._id.toString());
+
+      if (dependencyBindProject.length > 0) {
+        // Remove dependencies without recursion
+        await this.removeDependencies(dependencyBindProject);
+      }
+
+      // Remove the project itself
       const result = await this.ProjectModel.deleteOne({ _id: id }).exec();
+
+      if (result.deletedCount === 0) {
+        throw new NotFoundException(`Project with ID ${id} not found`);
+      }
+
       return result;
     } catch (error) {
+      console.error('Error removing project:', error);
       throw new InternalServerErrorException(
         'Error deleting project: ' + error.message,
       );
     }
+  }
+
+  // Method to remove dependencies separately
+  private async removeDependencies(dependencies: any[]) {
+    const removePromises = dependencies.map(
+      (dependency) => this.dependencyService.remove(dependency._id.toString()), // Assuming you have a remove method in dependencyService
+    );
+
+    await Promise.all(removePromises);
   }
 }
