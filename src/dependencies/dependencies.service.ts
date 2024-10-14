@@ -10,11 +10,13 @@ import { UpdateDependencyDto } from './dto/update-dependency.dto';
 import { Dependency } from './entities/dependency.entity';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { ElementsService } from 'src/elements/elements.service';
 
 @Injectable()
 export class DependenciesService {
   constructor(
     @InjectModel(Dependency.name) private DependencyModel: Model<Dependency>,
+    private readonly elementService: ElementsService,
   ) {}
 
   async create(createDependencyDto: CreateDependencyDto) {
@@ -106,16 +108,50 @@ export class DependenciesService {
 
   async remove(id: string) {
     if (!id) throw new BadRequestException('Dependency ID is required');
+
     try {
+      // Buscar a dependência
+      const dependency = await this.DependencyModel.findOne({ _id: id }).exec();
+
+      // Verificar se a dependência existe
+      if (!dependency) {
+        throw new NotFoundException(`Dependency with ID ${id} not found`);
+      }
+
+      // Buscar todos os elementos vinculados à dependência
+      const elementsBindDependency =
+        await this.elementService.findAllByDependencyId(
+          dependency._id.toString(),
+        );
+
+      // Remover todos os elementos vinculados
+      if (elementsBindDependency.length > 0) {
+        await this.removeElements(elementsBindDependency);
+      }
+
+      // Remover a dependência
       const result = await this.DependencyModel.deleteOne({ _id: id }).exec();
+
+      // Verificar se a remoção foi bem-sucedida
       if (result.deletedCount === 0) {
         throw new NotFoundException(`Dependency with ID ${id} not found`);
       }
+
       return result;
     } catch (error) {
+      console.error('Error removing dependency:', error);
       throw new BadRequestException(
         'Error deleting Dependency: ' + error.message,
       );
     }
+  }
+
+  // Método para remover os elementos
+  private async removeElements(elements: any[]) {
+    const removePromises = elements.map((element) =>
+      this.elementService.remove(element._id.toString()),
+    );
+
+    await Promise.all(removePromises);
   }
 }

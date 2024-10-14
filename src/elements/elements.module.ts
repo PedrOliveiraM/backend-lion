@@ -11,5 +11,6 @@ import { Element } from './entities/element.entity';
   ],
   controllers: [ElementsController],
   providers: [ElementsService],
+  exports: [ElementsService],
 })
 export class ElementsModule {}
