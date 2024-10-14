@@ -12,5 +12,6 @@ import { Component, ComponentSchema } from './entities/component.entity';
   ],
   controllers: [ComponentsController],
   providers: [ComponentsService],
+  exports: [ComponentsService],
 })
 export class ComponentsModule {}

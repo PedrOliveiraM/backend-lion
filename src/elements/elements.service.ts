@@ -10,11 +10,13 @@ import { UpdateElementDto } from './dto/update-element.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Element } from './entities/element.entity';
+import { ComponentsService } from 'src/components/components.service';
 
 @Injectable()
 export class ElementsService {
   constructor(
     @InjectModel(Element.name) private ElementModel: Model<Element>,
+    private readonly componentService: ComponentsService,
   ) {}
 
   async create(createElementDto: CreateElementDto) {
@@ -124,22 +126,50 @@ export class ElementsService {
 
   async remove(id: string) {
     if (!id) {
-      throw new BadRequestException('ID is required');
+      throw new BadRequestException('Element ID is required');
     }
 
     try {
+      // Buscar o elemento
       const element = await this.ElementModel.findById(id).exec();
 
+      // Verificar se o elemento existe
       if (!element) {
         throw new NotFoundException('Element not found');
       }
 
-      await this.ElementModel.deleteOne({ _id: id }).exec();
+      // Buscar todos os components vinculados ao element
+      const componentsBindElement =
+        await this.componentService.findAllByElementId(element._id.toString());
+
+      // Remover todos os components vinculados ao element
+      if (componentsBindElement.length > 0) {
+        await this.removeComponents(componentsBindElement);
+      }
+
+      // Remover o elemento
+      const result = await this.ElementModel.deleteOne({ _id: id }).exec();
+
+      // Verificar se a remoção foi bem-sucedida
+      if (result.deletedCount === 0) {
+        throw new NotFoundException(`Element with ID ${id} not found`);
+      }
+
       return { message: 'Element deleted successfully' };
     } catch (error) {
+      console.error('Error removing element:', error);
       throw new InternalServerErrorException(
         'Error deleting element in database: ' + error.message,
       );
     }
+  }
+
+  // Método para remover os components
+  private async removeComponents(components: any[]) {
+    const removePromises = components.map((component) =>
+      this.componentService.remove(component._id.toString()),
+    );
+
+    await Promise.all(removePromises);
   }
 }

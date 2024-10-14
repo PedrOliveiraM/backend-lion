@@ -174,8 +174,8 @@ export class ProjectsService {
       const dependencyBindProject =
         await this.dependencyService.findAllByProjectId(project._id.toString());
 
+      // Remover dependências apenas se existirem
       if (dependencyBindProject.length > 0) {
-        // Remove dependencies without recursion
         await this.removeDependencies(dependencyBindProject);
       }
 
@@ -186,7 +186,7 @@ export class ProjectsService {
         throw new NotFoundException(`Project with ID ${id} not found`);
       }
 
-      return result;
+      return { message: 'Project deleted successfully' }; // Retornar uma mensagem de sucesso
     } catch (error) {
       console.error('Error removing project:', error);
       throw new InternalServerErrorException(
@@ -197,8 +197,8 @@ export class ProjectsService {
 
   // Method to remove dependencies separately
   private async removeDependencies(dependencies: any[]) {
-    const removePromises = dependencies.map(
-      (dependency) => this.dependencyService.remove(dependency._id.toString()), // Assuming you have a remove method in dependencyService
+    const removePromises = dependencies.map((dependency) =>
+      this.dependencyService.remove(dependency._id.toString()),
     );
 
     await Promise.all(removePromises);

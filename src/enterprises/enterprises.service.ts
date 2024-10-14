@@ -119,32 +119,57 @@ export class EnterprisesService {
   }
 
   async remove(id: string) {
-    if (!id) throw new BadRequestException('Enterprise ID is required');
+    if (!id) {
+      throw new BadRequestException('Enterprise ID is required');
+    }
+
     try {
+      // Buscar o enterprise
       const enterprise = await this.EnterpriseModel.findById(id).exec();
 
+      // Verificar se o enterprise existe
       if (!enterprise) {
         throw new NotFoundException(`Enterprise with ID ${id} not found`);
       }
 
+      // Buscar todos os projetos vinculados ao enterprise
       const projectsBindEnterprise =
         await this.projectsService.findAllByEnterpriseId(
           enterprise._id.toString(),
         );
 
-      // Remover todos os projetos vinculados ao empreendimento
-      const removePromises = projectsBindEnterprise.map((project) =>
-        this.projectsService.remove(project._id.toString()),
-      );
-      await Promise.all(removePromises);
+      // Se não houver projetos vinculados, continue com a remoção do enterprise
+      if (projectsBindEnterprise.length > 0) {
+        await this.removeProjects(projectsBindEnterprise);
+      }
 
+      // Remover o enterprise
       const result = await this.EnterpriseModel.deleteOne({ _id: id }).exec();
 
-      return result;
+      // Verificar se a remoção foi bem-sucedida
+      if (result.deletedCount === 0) {
+        throw new NotFoundException(
+          `Enterprise with ID ${id} not found or already deleted`,
+        );
+      }
+
+      return {
+        message: 'Enterprise and associated projects deleted successfully',
+      };
     } catch (error) {
-      throw new BadRequestException(
-        'Error deleting enterprise: ' + error.message,
+      console.error('Error deleting enterprise:', error);
+      throw new InternalServerErrorException(
+        'Error deleting enterprise in database: ' + error.message,
       );
     }
+  }
+
+  // Método para remover os projetos
+  private async removeProjects(projects: any[]) {
+    const removePromises = projects.map(
+      (project) => this.projectsService.remove(project._id.toString()), // Chamando o método de remoção do projeto
+    );
+
+    await Promise.all(removePromises);
   }
 }
