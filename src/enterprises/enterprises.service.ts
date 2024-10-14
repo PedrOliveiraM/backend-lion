@@ -10,11 +10,13 @@ import { Model } from 'mongoose';
 import { CreateEnterpriseDto } from './dto/create-enterprise.dto';
 import { UpdateEnterpriseDto } from './dto/update-enterprise.dto';
 import { Enterprise } from './entities/enterprise.entity';
+import { ProjectsService } from 'src/projects/projects.service';
 
 @Injectable()
 export class EnterprisesService {
   constructor(
     @InjectModel(Enterprise.name) private EnterpriseModel: Model<Enterprise>,
+    private readonly projectsService: ProjectsService,
   ) {}
 
   async create(createEnterpriseDto: CreateEnterpriseDto): Promise<Enterprise> {
@@ -119,13 +121,30 @@ export class EnterprisesService {
   async remove(id: string) {
     if (!id) throw new BadRequestException('Enterprise ID is required');
     try {
-      const result = await this.EnterpriseModel.deleteOne({ _id: id }).exec();
-      if (result.deletedCount === 0) {
+      const enterprise = await this.EnterpriseModel.findById(id).exec();
+
+      if (!enterprise) {
         throw new NotFoundException(`Enterprise with ID ${id} not found`);
       }
+
+      const projectsBindEnterprise =
+        await this.projectsService.findAllByEnterpriseId(
+          enterprise._id.toString(),
+        );
+
+      // Remover todos os projetos vinculados ao empreendimento
+      const removePromises = projectsBindEnterprise.map((project) =>
+        this.projectsService.remove(project._id.toString()),
+      );
+      await Promise.all(removePromises);
+
+      const result = await this.EnterpriseModel.deleteOne({ _id: id }).exec();
+
       return result;
     } catch (error) {
-      throw new BadRequestException('Error deleting user: ' + error.message);
+      throw new BadRequestException(
+        'Error deleting enterprise: ' + error.message,
+      );
     }
   }
 }
