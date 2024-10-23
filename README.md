@@ -1,5 +1,3 @@
-Aqui está a versão alterada do readme para o projeto **LION XPRO - PLATAFORMA DE AUXÍLIO AO DESENVOLVIMENTO DE PROJETOS DE EDIFICAÇÕES**:
-
 ---
 
 # LION XPRO - PLATAFORMA DE AUXÍLIO AO DESENVOLVIMENTO DE PROJETOS DE EDIFICAÇÕES ![Em Andamento](https://img.shields.io/badge/status-em%20andamento-yellow)
